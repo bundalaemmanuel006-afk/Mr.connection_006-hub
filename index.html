@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr.connection_006-hub</title>
+  <style>
+    :root { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; } }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+    .card { border: 2px solid var(--text); padding: 32px; border-radius: 12px; max-width: 420px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .card:hover, .card:focus-within { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    h1 { margin-top: 0; font-size: 2rem; color: var(--primary); }
+    p { font-size: 1.1rem; line-height: 1.6; margin: 16px 0 24px 0; }
+    button { background: var(--primary); color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+    button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    button:hover { opacity: 0.9; }
+    button:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    <h1 id="title">Mr.connection_006-hub</h1>
+    <p>Future life starts today. Connect seamlessly and securely to your digital gateway.</p>
+    <button aria-label="Enter the digital connection hub" onclick="alert('Welcome to Mr.connection_006-hub!')">Enter Hub</button>
+  </main>
+</body>
+</html>
