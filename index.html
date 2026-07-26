@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr.connection_006-hub</title>
+  <style>
+    :root { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; } }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+    .card { border: 2px solid var(--text); padding: 32px; border-radius: 12px; max-width: 420px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .card:hover, .card:focus-within { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    h1 { margin-top: 0; font-size: 2rem; color: var(--primary); }
+    p { font-size: 1.1rem; line-height: 1.6; margin: 16px 0 24px 0; }
+    button { background: var(--primary); color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 140px; margin: 0 auto; }
+    button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 14px; height: 14px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .details-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0; border-top: 1px dashed var(--text); padding-top: 0; }
+    .details-panel.visible { max-height: 150px; opacity: 1; margin-top: 24px; padding-top: 16px; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+    .status-label { font-weight: 500; opacity: 0.8; }
+    .status-value { display: inline-flex; align-items: center; gap: 6px; font-family: monospace; font-weight: bold; }
+    .pulse-dot { width: 8px; height: 8px; background-color: #2e7d32; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(46,125,50,0.7); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46,125,50,0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0); } }
+    .copy-btn { background: none; color: var(--text); border: none; padding: 4px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0 0 0 8px; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s; }
+    .copy-btn:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .copy-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .icon { width: 14px; height: 14px; }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    <h1 id="title">Mr.connection_006-hub</h1>
+    <p>Future life starts today. Connect seamlessly and securely to your digital gateway.</p>
+    <button id="hub-btn" aria-label="Enter the digital connection hub" onclick="connectHub()">
+      <span id="btn-text">Enter Hub</span>
+    </button>
+    <div id="connection-info" class="details-panel" aria-hidden="true">
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value"><span class="pulse-dot" aria-hidden="true"></span>Active Gateway</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Session ID:</span>
+        <span class="status-value">
+          <span id="session-id">Pending...</span>
+          <button id="copy-btn" class="copy-btn" aria-label="Copy Session ID to clipboard" onclick="copySessionId()" style="display: none;">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Protocol:</span>
+        <span class="status-value">AES-256-GCM</span>
+      </div>
+    </div>
+    <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  </main>
+  <script>
+    async function connectHub() {
+      const b = document.getElementById('hub-btn'), t = document.getElementById('btn-text'), s = document.getElementById('sr-status');
+      if (b.disabled) return;
+      b.disabled = true; b.setAttribute('aria-busy', 'true');
+      const spinner = document.createElement('span'); spinner.className = 'spinner'; b.insertBefore(spinner, t);
+      t.textContent = 'Connecting...'; s.textContent = 'Connecting to digital hub, please wait.';
+      await new Promise(r => setTimeout(r, 1200));
+      spinner.remove(); b.removeAttribute('aria-busy'); b.style.background = '#2e7d32';
+      t.innerHTML = '✓ Connected'; b.setAttribute('aria-label', 'Successfully connected');
+      const sessionVal = 'CONN-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('session-id').textContent = sessionVal;
+      document.getElementById('copy-btn').style.display = 'inline-flex';
+      const info = document.getElementById('connection-info');
+      info.classList.add('visible');
+      info.setAttribute('aria-hidden', 'false');
+      s.textContent = 'Connection successful. Welcome to Mr.connection_006-hub! Secure session ' + sessionVal + ' is now active on protocol AES-256-GCM.';
+    }
+
+    async function copySessionId() {
+      const id = document.getElementById('session-id').textContent;
+      const btn = document.getElementById('copy-btn');
+      const s = document.getElementById('sr-status');
+      try {
+        await navigator.clipboard.writeText(id);
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        btn.setAttribute('aria-label', 'Session ID copied to clipboard');
+        s.textContent = 'Session ID copied to clipboard';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.setAttribute('aria-label', 'Copy Session ID to clipboard');
+        }, 2000);
+      } catch (err) {
+        s.textContent = 'Failed to copy Session ID. Please select and copy manually.';
+      }
+    }
+  </script>
+</body>
+</html>
