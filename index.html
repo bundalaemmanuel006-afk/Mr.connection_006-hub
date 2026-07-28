@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr.connection_006-hub</title>
+  <style>
+    :root { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; } }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+    .card { border: 2px solid var(--text); padding: 32px; border-radius: 12px; max-width: 420px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .card:hover, .card:focus-within { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    h1 { margin-top: 0; font-size: 2rem; color: var(--primary); }
+    p { font-size: 1.1rem; line-height: 1.6; margin: 16px 0 24px 0; }
+    button { background: var(--primary); color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s, opacity 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 140px; margin: 0 auto; }
+    button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.connected { background-color: #2e7d32; }
+    button.connected:hover:not(:disabled), button.connected:focus-visible { background-color: #c62828; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 14px; height: 14px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .details-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0; border-top: 1px dashed var(--text); padding-top: 0; }
+    .details-panel.visible { max-height: 150px; opacity: 1; margin-top: 24px; padding-top: 16px; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+    .status-label { font-weight: 500; opacity: 0.8; }
+    .status-value { display: inline-flex; align-items: center; gap: 6px; font-family: monospace; font-weight: bold; }
+    .pulse-dot { width: 8px; height: 8px; background-color: #2e7d32; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(46,125,50,0.7); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46,125,50,0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0); } }
+    .copy-btn { background: none; color: var(--text); border: none; padding: 4px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0 0 0 8px; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s; }
+    .copy-btn:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .copy-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .icon { width: 14px; height: 14px; }
+    .progress-container { width: 100%; height: 6px; background-color: rgba(128, 128, 128, 0.15); border-radius: 3px; overflow: hidden; margin-top: 16px; margin-bottom: -4px; display: none; }
+    .progress-bar { width: 0%; height: 100%; background-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    <h1 id="title">Mr.connection_006-hub</h1>
+    <p>Future life starts today. Connect seamlessly and securely to your digital gateway.</p>
+    <button id="hub-btn" aria-label="Enter the digital connection hub" onclick="connectHub()">
+      <span id="btn-text">Enter Hub</span>
+    </button>
+    <div id="progress-container" class="progress-container">
+      <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Connection progress"></div>
+    </div>
+    <div id="connection-info" class="details-panel" aria-hidden="true">
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value"><span class="pulse-dot" aria-hidden="true"></span>Active Gateway</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Session ID:</span>
+        <span class="status-value">
+          <span id="session-id">Pending...</span>
+          <button id="copy-btn" class="copy-btn" aria-label="Copy Session ID to clipboard" onclick="copySessionId()" style="display: none;">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Protocol:</span>
+        <span class="status-value">AES-256-GCM</span>
+      </div>
+    </div>
+    <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  </main>
+  <script>
+    const b = document.getElementById('hub-btn');
+    const t = document.getElementById('btn-text');
+    const s = document.getElementById('sr-status');
+    const info = document.getElementById('connection-info');
+    const sessionId = document.getElementById('session-id');
+    const copyBtn = document.getElementById('copy-btn');
+
+    let isConnected = false;
+    let isTransitioning = false;
+
+    function updateButtonHoverState(hovered) {
+      if (isConnected && !isTransitioning) {
+        if (hovered) {
+          t.textContent = 'Disconnect';
+          b.setAttribute('aria-label', 'Disconnect from secure gateway');
+        } else {
+          t.textContent = '✓ Connected';
+          b.setAttribute('aria-label', 'Connected to secure gateway. Click to disconnect.');
+        }
+      }
+    }
+
+    b.addEventListener('mouseenter', () => updateButtonHoverState(true));
+    b.addEventListener('mouseleave', () => updateButtonHoverState(false));
+    b.addEventListener('focus', () => updateButtonHoverState(true));
+    b.addEventListener('blur', () => updateButtonHoverState(false));
+
+    function animateProgressBar(duration, startVal, endVal, color, onComplete) {
+      const container = document.getElementById('progress-container');
+      const bar = document.getElementById('progress-bar');
+      container.style.display = 'block';
+      bar.style.backgroundColor = color;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentVal = Math.round(startVal + (endVal - startVal) * progress);
+        bar.style.width = currentVal + '%';
+        bar.setAttribute('aria-valuenow', currentVal);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          setTimeout(() => {
+            container.style.display = 'none';
+            bar.style.width = '0%';
+            bar.setAttribute('aria-valuenow', '0');
+            if (onComplete) onComplete();
+          }, 150);
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    async function connectHub() {
+      if (isTransitioning) return;
+
+      if (!isConnected) {
+        isTransitioning = true;
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Connecting...';
+        s.textContent = 'Connecting to digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(1200, 0, 100, 'var(--primary)', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.add('connected');
+        isConnected = true;
+        isTransitioning = false;
+
+        t.textContent = '✓ Connected';
+        b.setAttribute('aria-label', 'Connected to secure gateway. Click to disconnect.');
+
+        const sessionVal = 'CONN-' + Math.floor(1000 + Math.random() * 9000);
+        sessionId.textContent = sessionVal;
+        copyBtn.style.display = 'inline-flex';
+
+        info.classList.add('visible');
+        info.setAttribute('aria-hidden', 'false');
+        s.textContent = 'Connection successful. Welcome to Mr.connection_006-hub! Secure session ' + sessionVal + ' is now active on protocol AES-256-GCM.';
+      } else {
+        isTransitioning = true;
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Disconnecting...';
+        s.textContent = 'Disconnecting from digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(800, 0, 100, '#c62828', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.remove('connected');
+        isConnected = false;
+        isTransitioning = false;
+
+        t.textContent = 'Enter Hub';
+        b.setAttribute('aria-label', 'Enter the digital connection hub');
+
+        copyBtn.style.display = 'none';
+        sessionId.textContent = 'Pending...';
+
+        info.classList.remove('visible');
+        info.setAttribute('aria-hidden', 'true');
+        s.textContent = 'Successfully disconnected. Gateway is now offline.';
+      }
+    }
+
+    async function copySessionId() {
+      const id = sessionId.textContent;
+      try {
+        await navigator.clipboard.writeText(id);
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        copyBtn.setAttribute('aria-label', 'Session ID copied to clipboard');
+        s.textContent = 'Session ID copied to clipboard';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+          copyBtn.setAttribute('aria-label', 'Copy Session ID to clipboard');
+        }, 2000);
+      } catch (err) {
+        s.textContent = 'Failed to copy Session ID. Please select and copy manually.';
+      }
+    }
+  </script>
+</body>
+</html>
