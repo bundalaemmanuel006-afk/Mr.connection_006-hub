@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr.connection_006-hub</title>
+  <style>
+    :root { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; } }
+    :root.light-theme { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; }
+    :root.dark-theme { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; }
+    html { background-color: var(--bg); transition: background-color 0.3s ease; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; transition: background-color 0.3s ease, color 0.3s ease; }
+    .card { position: relative; border: 2px solid var(--text); padding: 32px; border-radius: 12px; max-width: 420px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .theme-toggle { position: absolute; top: 12px; right: 12px; background: none; color: var(--text); border: none; padding: 6px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s, transform 0.1s; }
+    .theme-toggle:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .theme-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .theme-toggle:active:not(:disabled) { transform: scale(0.95); }
+    .theme-toggle .icon { width: 16px; height: 16px; }
+    .theme-key-badge { font-size: 0.7rem; font-family: monospace; opacity: 0.7; margin-right: 4px; border: 1px solid var(--text); padding: 1px 3px; border-radius: 3px; transition: border-color 0.3s ease; }
+    .card:hover, .card:focus-within { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    h1 { margin-top: 0; font-size: 2rem; color: var(--primary); }
+    p { font-size: 1.1rem; line-height: 1.6; margin: 16px 0 24px 0; }
+    button { background: var(--primary); color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s, opacity 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 140px; margin: 0 auto; }
+    button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.connected { background-color: #2e7d32; }
+    button.connected:hover:not(:disabled), button.connected:focus-visible { background-color: #c62828; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 14px; height: 14px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .spinning { animation: spin 0.8s linear infinite; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .details-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0; border-top: 1px dashed var(--text); padding-top: 0; }
+    .details-panel.visible { max-height: 220px; opacity: 1; margin-top: 24px; padding-top: 16px; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+    .status-label { font-weight: 500; opacity: 0.8; }
+    .status-value { display: inline-flex; align-items: center; gap: 6px; font-family: monospace; font-weight: bold; }
+    .pulse-dot { width: 8px; height: 8px; background-color: #2e7d32; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(46,125,50,0.7); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46,125,50,0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0); } }
+    .copy-btn { background: none; color: var(--text); border: none; padding: 4px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0 0 0 8px; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s; }
+    .copy-btn:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .copy-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .icon { width: 14px; height: 14px; }
+    .progress-container { width: 100%; height: 6px; background-color: rgba(128, 128, 128, 0.15); border-radius: 3px; overflow: hidden; margin-top: 16px; margin-bottom: -4px; display: none; }
+    .progress-bar { width: 0%; height: 100%; background-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+      <span class="theme-key-badge" aria-hidden="true">T</span>
+      <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+    <h1 id="title">Mr.connection_006-hub</h1>
+    <p>Future life starts today. Connect seamlessly and securely to your digital gateway.</p>
+    <button id="hub-btn" aria-label="Enter the digital connection hub" onclick="connectHub()">
+      <span id="btn-text">Enter Hub</span>
+    </button>
+    <div id="progress-container" class="progress-container">
+      <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Connection progress"></div>
+    </div>
+    <div id="connection-info" class="details-panel" aria-hidden="true">
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value"><span class="pulse-dot" aria-hidden="true"></span>Active Gateway</span>
+      </div>
+      <div class="status-row" id="uptime-row" style="display: none;">
+        <span class="status-label">Uptime:</span>
+        <span class="status-value" id="uptime-val">00:00</span>
+      </div>
+      <div class="status-row" id="latency-row" style="display: none;">
+        <span class="status-label">Latency:</span>
+        <span class="status-value">
+          <span id="latency-val">Measuring...</span>
+          <button id="ping-btn" class="copy-btn" aria-label="Re-measure connection latency (Press R)" onclick="measureLatency()">
+            <span style="font-size: 0.7rem; font-family: monospace; opacity: 0.7; margin-right: 4px; border: 1px solid var(--text); padding: 1px 3px; border-radius: 3px;" aria-hidden="true">R</span>
+            <svg class="icon ping-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 4v6h-6"></path>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Session ID:</span>
+        <span class="status-value">
+          <span id="session-id">Pending...</span>
+          <button id="copy-btn" class="copy-btn" aria-label="Copy Session ID to clipboard (Press C)" onclick="copySessionId()" style="display: none;">
+            <span style="font-size: 0.7rem; font-family: monospace; opacity: 0.7; margin-right: 4px; border: 1px solid var(--text); padding: 1px 3px; border-radius: 3px;" aria-hidden="true">C</span>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Protocol:</span>
+        <span class="status-value">AES-256-GCM</span>
+      </div>
+    </div>
+    <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  </main>
+  <script>
+    // Immediate early execution to prevent color flashing before full load
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+      document.documentElement.className = isDark ? 'dark-theme' : 'light-theme';
+    })();
+
+    const b = document.getElementById('hub-btn');
+    const t = document.getElementById('btn-text');
+    const s = document.getElementById('sr-status');
+    const info = document.getElementById('connection-info');
+    const sessionId = document.getElementById('session-id');
+    const copyBtn = document.getElementById('copy-btn');
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+
+    let isConnected = false;
+    let isTransitioning = false;
+    let uptimeInterval = null;
+    let uptimeSeconds = 0;
+    let isMeasuringPing = false;
+
+    function updateButtonHoverState(hovered) {
+      if (isConnected && !isTransitioning) {
+        if (hovered) {
+          t.textContent = 'Disconnect';
+          b.setAttribute('aria-label', 'Disconnect from secure gateway');
+        } else {
+          t.textContent = '✓ Connected';
+          b.setAttribute('aria-label', 'Connected to secure gateway. Click to disconnect.');
+        }
+      }
+    }
+
+    b.addEventListener('mouseenter', () => updateButtonHoverState(true));
+    b.addEventListener('mouseleave', () => updateButtonHoverState(false));
+    b.addEventListener('focus', () => updateButtonHoverState(true));
+    b.addEventListener('blur', () => updateButtonHoverState(false));
+
+    function animateProgressBar(duration, startVal, endVal, color, onComplete) {
+      const container = document.getElementById('progress-container');
+      const bar = document.getElementById('progress-bar');
+      container.style.display = 'block';
+      bar.style.backgroundColor = color;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentVal = Math.round(startVal + (endVal - startVal) * progress);
+        bar.style.width = currentVal + '%';
+        bar.setAttribute('aria-valuenow', currentVal);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          setTimeout(() => {
+            container.style.display = 'none';
+            bar.style.width = '0%';
+            bar.setAttribute('aria-valuenow', '0');
+            if (onComplete) onComplete();
+          }, 150);
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    async function measureLatency() {
+      if (isMeasuringPing || !isConnected) return;
+      isMeasuringPing = true;
+      const pingBtn = document.getElementById('ping-btn');
+      const pingIcon = pingBtn.querySelector('.ping-icon');
+      const latencyVal = document.getElementById('latency-val');
+
+      pingBtn.disabled = true;
+      pingIcon.classList.add('spinning');
+      latencyVal.textContent = 'Measuring...';
+      s.textContent = 'Measuring gateway connection latency...';
+
+      const delay = 300 + Math.random() * 200;
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      const ping = Math.floor(12 + Math.random() * 28);
+      latencyVal.textContent = ping + ' ms';
+      pingIcon.classList.remove('spinning');
+      pingBtn.disabled = false;
+      isMeasuringPing = false;
+
+      s.textContent = 'Latency updated: ' + ping + ' milliseconds.';
+    }
+
+    async function connectHub() {
+      if (isTransitioning) return;
+
+      if (!isConnected) {
+        isTransitioning = true;
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Connecting...';
+        s.textContent = 'Connecting to digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(1200, 0, 100, 'var(--primary)', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.add('connected');
+        isConnected = true;
+        isTransitioning = false;
+
+        t.textContent = '✓ Connected';
+        b.setAttribute('aria-label', 'Connected to secure gateway. Click to disconnect.');
+
+        const sessionVal = 'CONN-' + Math.floor(1000 + Math.random() * 9000);
+        sessionId.textContent = sessionVal;
+        copyBtn.style.display = 'inline-flex';
+
+        // Start Uptime counter
+        uptimeSeconds = 0;
+        const uptimeVal = document.getElementById('uptime-val');
+        const uptimeRow = document.getElementById('uptime-row');
+        uptimeRow.style.display = 'flex';
+        uptimeVal.textContent = '00:00';
+        uptimeInterval = setInterval(() => {
+          uptimeSeconds++;
+          const mins = String(Math.floor(uptimeSeconds / 60)).padStart(2, '0');
+          const secs = String(uptimeSeconds % 60).padStart(2, '0');
+          uptimeVal.textContent = mins + ':' + secs;
+        }, 1000);
+
+        // Show Latency row and measure initial latency
+        const latencyRow = document.getElementById('latency-row');
+        latencyRow.style.display = 'flex';
+        measureLatency();
+
+        info.classList.add('visible');
+        info.setAttribute('aria-hidden', 'false');
+        s.textContent = 'Connection successful. Welcome to Mr.connection_006-hub! Secure session ' + sessionVal + ' is now active on protocol AES-256-GCM.';
+      } else {
+        isTransitioning = true;
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Disconnecting...';
+        s.textContent = 'Disconnecting from digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(800, 0, 100, '#c62828', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.remove('connected');
+        isConnected = false;
+        isTransitioning = false;
+
+        t.textContent = 'Enter Hub';
+        b.setAttribute('aria-label', 'Enter the digital connection hub');
+
+        copyBtn.style.display = 'none';
+        sessionId.textContent = 'Pending...';
+
+        // Stop Uptime counter
+        if (uptimeInterval) {
+          clearInterval(uptimeInterval);
+          uptimeInterval = null;
+        }
+        document.getElementById('uptime-row').style.display = 'none';
+        document.getElementById('uptime-val').textContent = '00:00';
+
+        // Hide Latency row and reset value
+        document.getElementById('latency-row').style.display = 'none';
+        document.getElementById('latency-val').textContent = 'Measuring...';
+
+        info.classList.remove('visible');
+        info.setAttribute('aria-hidden', 'true');
+        s.textContent = 'Successfully disconnected. Gateway is now offline.';
+      }
+    }
+
+    async function copySessionId() {
+      const id = sessionId.textContent;
+      try {
+        await navigator.clipboard.writeText(id);
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        copyBtn.setAttribute('aria-label', 'Session ID copied to clipboard');
+        s.textContent = 'Session ID copied to clipboard';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+          copyBtn.setAttribute('aria-label', 'Copy Session ID to clipboard (Press C)');
+        }, 2000);
+      } catch (err) {
+        s.textContent = 'Failed to copy Session ID. Please select and copy manually.';
+      }
+    }
+
+    function setTheme(isDark) {
+      if (isDark) {
+        document.documentElement.className = 'dark-theme';
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+        themeToggle.setAttribute('aria-label', 'Switch to light mode (Press T)');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.className = 'light-theme';
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+        themeToggle.setAttribute('aria-label', 'Switch to dark mode (Press T)');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark-theme') ||
+                     (!document.documentElement.classList.contains('light-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      setTheme(!isDark);
+      s.textContent = `Theme switched to ${!isDark ? 'dark' : 'light'} mode`;
+    }
+
+    // Set initial icon and accessibility attributes on load
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+    setTheme(initialDark);
+
+    document.addEventListener('keydown', (e) => {
+      // Avoid firing shortcut if typing in any text fields (in case we add inputs later)
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        toggleTheme();
+      }
+
+      if (isConnected && !isTransitioning && copyBtn.style.display !== 'none') {
+        if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          copySessionId();
+        }
+      }
+
+      if (isConnected && !isTransitioning && !isMeasuringPing) {
+        if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          measureLatency();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
