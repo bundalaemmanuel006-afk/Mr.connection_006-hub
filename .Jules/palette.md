@@ -1,0 +1,7 @@
+## 2026-08-02 - State-Aware Network Protocol Switcher Micro-Interactions
+**Learning:** Interactive configurations (such as protocol switching) in dynamic connection hubs must visually and aurally reflect the overall system state (connected vs. disconnected). Transition phrases like "Negotiating..." are intuitive during active states, but feel incorrect when disconnected, where "Configuring..." is much more suitable. Correspondingly, assistive technology announcements should synchronize seamlessly with the currently selected settings upon gateway entry.
+**Action:** Customize transition labels according to connection state and ensure setup announcements dynamically read selected parameters rather than hardcoded configurations.
+
+## 2023-11-20 - Interactive Latency and Telemetry Metrics for Real-time Status Dashboards
+**Learning:** When adding dynamic network/telemetry stats (such as latency/ping or live uptime counters) to dashboard widgets, introducing micro-interactions like manual "re-measure" triggers with keyboard shortcut access significantly improves interface perceived performance and responsiveness. However, dynamic DOM updates can be confusing to screen-reader users unless supported by polite ARIA live regions (`aria-live="polite"`) that announce changes sequentially without interrupting the main focus flow.
+**Action:** Always bundle real-time/dynamic stats with a manual trigger (with shortcut hints visible on screen) and provide screen-reader announcements when the metric is updated or in a loading/measuring state.
