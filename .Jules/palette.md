@@ -1,0 +1,19 @@
+## 2026-08-06 - Screen-Reader Safe Toast Notifications with Theme Auto-Matching
+**Learning:** Displaying dynamic toast notifications for user interactions (such as theme toggles or clipboard copy confirmations) provides immediate visual feedback. However, toasts can trigger duplicate spoken announcements for screen-reader users if both the visual toast element and a separate ARIA live region (like `aria-live="polite"`) announce the same event. Applying `aria-hidden="true"` to the visual toast prevents screen-reader "double announcement" fatigue. Additionally, referencing existing CSS system variables ensures the toasts adapt to light/dark themes and high-contrast modes flawlessly.
+**Action:** Apply `aria-hidden="true"` on visual-only status components if a centralized screen-reader live region is already announcing the action, and use CSS theme variables for automatic high-contrast / dark-mode support.
+
+## 2026-08-05 - Real-time Network Signal Visualization and Sequential Loading States
+**Learning:** When displaying dynamic network diagnostics like latency (ping), presenting only numerical raw values lacks immediate visual context. Introducing a synchronized, Wi-Fi style signal-bars indicator (graded from Excellent to Poor) greatly improves information accessibility and scannability. Animating these bars with a cascading step sequence during measurements makes network activity feel responsive and alive, converting a passive stat check into an engaging micro-interaction.
+**Action:** Bundle real-time status stats with highly-visual status indicators, and utilize cascading step animations during active transitions to indicate background processing.
+
+## 2026-08-03 - Context-Aware Interactive Shortcuts Panel
+**Learning:** Adding a keyboard shortcuts menu helps users discover productivity-boosting key bindings. However, when certain shortcuts depend on global application states (such as connection active), displaying stale instructions can lead to confusing and error-prone interactions. Highlighting state-dependent shortcuts with adaptive visual styling (like active vs. faded opacity transitions) and aria descriptions provides elegant guidance for screen reader and keyboard-only users.
+**Action:** Always group hotkeys logically and dynamically alter the visual weight of state-locked shortcuts based on the current context of the interface.
+
+## 2026-08-02 - State-Aware Network Protocol Switcher Micro-Interactions
+**Learning:** Interactive configurations (such as protocol switching) in dynamic connection hubs must visually and aurally reflect the overall system state (connected vs. disconnected). Transition phrases like "Negotiating..." are intuitive during active states, but feel incorrect when disconnected, where "Configuring..." is much more suitable. Correspondingly, assistive technology announcements should synchronize seamlessly with the currently selected settings upon gateway entry.
+**Action:** Customize transition labels according to connection state and ensure setup announcements dynamically read selected parameters rather than hardcoded configurations.
+
+## 2023-11-20 - Interactive Latency and Telemetry Metrics for Real-time Status Dashboards
+**Learning:** When adding dynamic network/telemetry stats (such as latency/ping or live uptime counters) to dashboard widgets, introducing micro-interactions like manual "re-measure" triggers with keyboard shortcut access significantly improves interface perceived performance and responsiveness. However, dynamic DOM updates can be confusing to screen-reader users unless supported by polite ARIA live regions (`aria-live="polite"`) that announce changes sequentially without interrupting the main focus flow.
+**Action:** Always bundle real-time/dynamic stats with a manual trigger (with shortcut hints visible on screen) and provide screen-reader announcements when the metric is updated or in a loading/measuring state.
