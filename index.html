@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr.connection_006-hub</title>
+  <style>
+    :root { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; --trend-up: #c62828; --trend-down: #2e7d32; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; --trend-up: #ef5350; --trend-down: #66bb6a; } }
+    :root.light-theme { --bg: #ffffff; --text: #1a1a1a; --primary: #0066cc; --trend-up: #c62828; --trend-down: #2e7d32; }
+    :root.dark-theme { --bg: #121212; --text: #f5f5f5; --primary: #3399ff; --trend-up: #ef5350; --trend-down: #66bb6a; }
+    html { background-color: var(--bg); transition: background-color 0.3s ease; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; transition: background-color 0.3s ease, color 0.3s ease; }
+    .card { position: relative; border: 2px solid var(--text); padding: 32px; border-radius: 12px; max-width: 420px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .theme-toggle { position: absolute; top: 12px; right: 12px; background: none; color: var(--text); border: none; padding: 6px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s, transform 0.1s; }
+    .theme-toggle:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .theme-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .theme-toggle:active:not(:disabled), .theme-toggle.active-click:not(:disabled) { transform: scale(0.85); opacity: 0.9; }
+    .theme-toggle .icon { width: 16px; height: 16px; }
+    .shortcuts-toggle { position: absolute; top: 12px; left: 12px; background: none; color: var(--text); border: none; padding: 6px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s, transform 0.1s; }
+    .shortcuts-toggle:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .shortcuts-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .shortcuts-toggle:active:not(:disabled), .shortcuts-toggle.active-click:not(:disabled) { transform: scale(0.85); opacity: 0.9; }
+    .shortcuts-toggle .icon { width: 16px; height: 16px; }
+    .theme-key-badge { font-size: 0.7rem; font-family: monospace; opacity: 0.7; margin-right: 4px; border: 1px solid var(--text); padding: 1px 3px; border-radius: 3px; transition: border-color 0.3s ease, background-color 0.15s ease, transform 0.15s ease, color 0.15s ease, opacity 0.15s ease; display: inline-block; }
+    kbd { background-color: rgba(128, 128, 128, 0.15); border: 1px solid var(--text); border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 0.85em; font-weight: bold; display: inline-block; transition: background-color 0.15s ease, transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease; }
+    .key-badge-inline { display: inline-block; transition: background-color 0.15s ease, transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease; }
+    .key-flash { background-color: var(--primary) !important; color: #ffffff !important; border-color: var(--primary) !important; opacity: 1 !important; transform: scale(1.15); }
+    .card:hover, .card:focus-within { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    h1 { margin-top: 16px; font-size: 1.8rem; color: var(--primary); }
+    p { font-size: 1.1rem; line-height: 1.6; margin: 16px 0 24px 0; }
+    button { background: var(--primary); color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s, opacity 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 140px; margin: 0 auto; }
+    button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    button:active:not(:disabled), button.active-click:not(:disabled) { transform: scale(0.95); opacity: 0.8; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.connected { background-color: #2e7d32; }
+    button.connected:hover:not(:disabled), button.connected:focus-visible { background-color: #c62828; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 14px; height: 14px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .spinning { animation: spin 0.8s linear infinite; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .details-panel { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0; border-top: 1px dashed var(--text); padding-top: 0; }
+    .details-panel.visible { max-height: 220px; opacity: 1; margin-top: 24px; padding-top: 16px; overflow: visible; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.95rem; }
+    .status-label { font-weight: 500; opacity: 0.8; }
+    .status-value { display: inline-flex; align-items: center; gap: 6px; font-family: monospace; font-weight: bold; }
+    .pulse-dot { width: 8px; height: 8px; background-color: #2e7d32; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(46,125,50,0.7); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46,125,50,0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46,125,50,0); } }
+    .copy-btn { background: none; color: var(--text); border: none; padding: 4px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: auto; margin: 0 0 0 8px; opacity: 0.6; transition: opacity 0.2s, background-color 0.2s; }
+    .copy-btn:hover:not(:disabled) { opacity: 1; background-color: rgba(128, 128, 128, 0.15); }
+    .copy-btn:active:not(:disabled), .copy-btn.active-click:not(:disabled) { transform: scale(0.85); opacity: 0.9; }
+    .copy-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .icon { width: 14px; height: 14px; }
+    .progress-container { width: 100%; height: 6px; background-color: rgba(128, 128, 128, 0.15); border-radius: 3px; overflow: hidden; margin-top: 16px; margin-bottom: -4px; display: none; }
+    .progress-bar { width: 0%; height: 100%; background-color: var(--primary); }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; transform: translateY(20px); background: var(--bg); color: var(--text); border: 2px solid var(--text); padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; }
+    .toast-container.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    /* Accessible Tooltips */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px) scale(0.9);
+      background-color: var(--text);
+      color: var(--bg);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 1001;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 1px solid var(--bg);
+    }
+    [data-tooltip]:hover::after,
+    [data-tooltip]:focus-visible::after {
+      opacity: 0.95;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    [data-tooltip].tooltip-bottom::after {
+      bottom: auto;
+      top: 125%;
+      transform: translateX(-50%) translateY(-4px) scale(0.9);
+    }
+    [data-tooltip].tooltip-bottom:hover::after,
+    [data-tooltip].tooltip-bottom:focus-visible::after {
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    /* Interactive Signal Wrapper focus style */
+    .signal-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      padding: 2px;
+      cursor: help;
+      transition: outline 0.15s, background-color 0.15s;
+    }
+    .signal-wrapper:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+      background-color: rgba(128, 128, 128, 0.1);
+    }
+    .toast-container {
+      cursor: pointer;
+    }
+    .node-select {
+      background: none;
+      color: var(--text);
+      border: 1px solid var(--text);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s, opacity 0.2s;
+    }
+    .node-select:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+    .node-select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .value-clickable {
+      position: relative;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background-color 0.2s, color 0.2s, outline 0.15s;
+    }
+    .value-clickable:hover {
+      background-color: rgba(128, 128, 128, 0.15);
+    }
+    .value-clickable:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+    /* Latency Trend Indicators */
+    .trend-indicator {
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 1px 4px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-flex;
+      align-items: center;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+    }
+    .trend-indicator.up {
+      color: var(--trend-up);
+      background-color: rgba(198, 40, 40, 0.1);
+    }
+    @media (prefers-color-scheme: dark) {
+      .trend-indicator.up {
+        background-color: rgba(239, 83, 80, 0.15);
+      }
+    }
+    :root.dark-theme .trend-indicator.up {
+      background-color: rgba(239, 83, 80, 0.15);
+    }
+    :root.light-theme .trend-indicator.up {
+      background-color: rgba(198, 40, 40, 0.1);
+    }
+    .trend-indicator.down {
+      color: var(--trend-down);
+      background-color: rgba(46, 125, 50, 0.1);
+    }
+    @media (prefers-color-scheme: dark) {
+      .trend-indicator.down {
+        background-color: rgba(102, 187, 106, 0.15);
+      }
+    }
+    :root.dark-theme .trend-indicator.down {
+      background-color: rgba(102, 187, 106, 0.15);
+    }
+    :root.light-theme .trend-indicator.down {
+      background-color: rgba(46, 125, 50, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast-container" aria-hidden="true"></div>
+  <main class="card" aria-labelledby="title">
+    <button id="shortcuts-toggle" class="shortcuts-toggle tooltip-bottom" data-tooltip="Shortcuts Help (?)" aria-label="Show keyboard shortcuts help" aria-expanded="false" aria-controls="shortcuts-panel" onclick="toggleShortcuts()">
+      <span id="badge-toggle" class="theme-key-badge" aria-hidden="true">?</span>
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </button>
+    <button id="theme-toggle" class="theme-toggle tooltip-bottom" data-tooltip="Switch to Dark/Light Mode (T)" aria-label="Toggle dark mode" onclick="toggleTheme()">
+      <span id="badge-theme" class="theme-key-badge" aria-hidden="true">T</span>
+      <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+    <h1 id="title">Mr.connection_006-hub</h1>
+
+    <div id="shortcuts-panel" class="details-panel" aria-hidden="true" style="text-align: left; max-height: 0; opacity: 0; margin-bottom: 16px;">
+      <h2 style="font-size: 1rem; margin-top: 0; margin-bottom: 12px; color: var(--primary);">Keyboard Shortcuts Help</h2>
+      <div class="status-row" style="margin: 6px 0;">
+        <span class="status-label">Toggle Shortcuts Help</span>
+        <span class="status-value"><kbd id="kbd-help" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press ?" aria-label="Toggle shortcuts help (?)">?</kbd></span>
+      </div>
+      <div class="status-row" style="margin: 6px 0;">
+        <span class="status-label">Close Shortcuts Panel</span>
+        <span class="status-value"><kbd id="kbd-esc" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press Esc" aria-label="Close shortcuts panel (Esc)">Esc</kbd></span>
+      </div>
+      <div class="status-row" style="margin: 6px 0;">
+        <span class="status-label">Toggle Theme (Light/Dark)</span>
+        <span class="status-value"><kbd id="kbd-theme" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press T" aria-label="Toggle theme (T)">T</kbd></span>
+      </div>
+      <div class="status-row" style="margin: 6px 0;">
+        <span class="status-label">Connect / Disconnect Hub</span>
+        <span class="status-value"><kbd id="kbd-hub" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press H" aria-label="Connect or disconnect hub (H)">H</kbd></span>
+      </div>
+      <div class="status-row" style="margin: 6px 0;">
+        <span class="status-label">Switch Protocol</span>
+        <span class="status-value"><kbd id="kbd-protocol" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press P" aria-label="Switch protocol (P)">P</kbd></span>
+      </div>
+      <div id="shortcut-copy-row" class="status-row" style="margin: 6px 0; opacity: 0.5; transition: opacity 0.3s ease;">
+        <span class="status-label">Copy Session ID</span>
+        <span class="status-value"><kbd id="kbd-copy" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press C" aria-label="Copy session ID (C)">C</kbd></span>
+      </div>
+      <div id="shortcut-ping-row" class="status-row" style="margin: 6px 0; opacity: 0.5; transition: opacity 0.3s ease;">
+        <span class="status-label">Re-measure Latency</span>
+        <span class="status-value"><kbd id="kbd-ping" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press R" aria-label="Re-measure latency (R)">R</kbd></span>
+      </div>
+      <div id="shortcut-node-row" class="status-row" style="margin: 6px 0; opacity: 0.5; transition: opacity 0.3s ease;">
+        <span class="status-label">Cycle Gateway Node</span>
+        <span class="status-value"><kbd id="kbd-node" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click or Press N" aria-label="Cycle gateway node (N)">N</kbd></span>
+      </div>
+    </div>
+    <p>Future life starts today. Connect seamlessly and securely to your digital gateway.</p>
+    <button id="hub-btn" aria-label="Enter the digital connection hub (Press H)" onclick="connectHub()">
+      <span id="badge-hub" class="theme-key-badge key-badge-inline" style="border-color: currentColor; margin-right: 6px;" aria-hidden="true">H</span>
+      <span id="btn-text">Enter Hub</span>
+    </button>
+    <div id="progress-container" class="progress-container">
+      <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Connection progress"></div>
+    </div>
+    <div id="connection-info" class="details-panel" aria-hidden="true">
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value"><span class="pulse-dot" aria-hidden="true"></span>Active Gateway</span>
+      </div>
+      <div class="status-row" id="node-row" style="display: none;">
+        <label for="node-select" class="status-label" style="cursor: pointer;">Gateway Node:</label>
+        <span class="status-value">
+          <span id="badge-node" class="theme-key-badge key-badge-inline value-clickable" tabindex="0" role="button" data-tooltip="Cycle Node (N)" aria-label="Cycle gateway node (Press N)" style="margin-right: 4px;" onclick="cycleNode()">N</span>
+          <select id="node-select" aria-label="Select Gateway Node" class="node-select" onchange="changeNode()">
+            <option value="us">🇺🇸 US-East</option>
+            <option value="eu">🇩🇪 EU-Central</option>
+            <option value="ap">🇯🇵 AP-Tokyo</option>
+          </select>
+        </span>
+      </div>
+      <div class="status-row" id="uptime-row" style="display: none;">
+        <span class="status-label">Uptime:</span>
+        <span class="status-value" id="uptime-val">00:00</span>
+      </div>
+      <div class="status-row" id="latency-row" style="display: none;">
+        <span class="status-label">Latency:</span>
+        <span class="status-value">
+          <span id="latency-val">Measuring...</span>
+          <span id="latency-trend" class="trend-indicator" style="display: none;" aria-hidden="true"></span>
+          <span id="signal-wrapper" class="signal-wrapper tooltip-bottom" tabindex="0" data-tooltip="Signal strength: offline" aria-label="Signal strength: offline">
+            <svg id="signal-bars" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" role="img" style="display: inline-block; vertical-align: middle;">
+              <rect x="3" y="14" width="3" height="6" rx="1" id="bar1" style="transition: opacity 0.2s, fill 0.2s; opacity: 0.3;" />
+              <rect x="8" y="10" width="3" height="10" rx="1" id="bar2" style="transition: opacity 0.2s, fill 0.2s; opacity: 0.3;" />
+              <rect x="13" y="6" width="3" height="14" rx="1" id="bar3" style="transition: opacity 0.2s, fill 0.2s; opacity: 0.3;" />
+              <rect x="18" y="2" width="3" height="18" rx="1" id="bar4" style="transition: opacity 0.2s, fill 0.2s; opacity: 0.3;" />
+            </svg>
+          </span>
+          <button id="ping-btn" class="copy-btn" data-tooltip="Re-measure Latency (R)" aria-label="Re-measure connection latency (Press R)" onclick="measureLatency()">
+            <span id="badge-ping" class="theme-key-badge key-badge-inline" aria-hidden="true">R</span>
+            <svg class="icon ping-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 4v6h-6"></path>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Session ID:</span>
+        <span class="status-value">
+          <span id="session-id">Pending...</span>
+          <button id="copy-btn" class="copy-btn" data-tooltip="Copy Session ID (C)" aria-label="Copy Session ID to clipboard (Press C)" onclick="copySessionId()" style="display: none;">
+            <span id="badge-copy" class="theme-key-badge key-badge-inline" aria-hidden="true">C</span>
+            <svg class="icon copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="icon check-icon" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Protocol:</span>
+        <span class="status-value">
+          <span id="protocol-val" class="value-clickable tooltip-bottom" tabindex="0" role="button" data-tooltip="Click to Switch Protocol (P)" aria-label="Protocol: AES-256-GCM. Click or press Enter to switch.">AES-256-GCM</span>
+          <button id="protocol-btn" class="copy-btn" data-tooltip="Switch Protocol (P)" aria-label="Switch connection protocol (Press P)" onclick="switchProtocol()">
+            <span id="badge-protocol" class="theme-key-badge key-badge-inline" aria-hidden="true">P</span>
+            <svg class="icon protocol-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 1l4 4-4 4"></path>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <path d="M7 23l-4-4 4-4"></path>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </button>
+        </span>
+      </div>
+    </div>
+    <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  </main>
+  <script>
+    // Immediate early execution to prevent color flashing before full load
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+      document.documentElement.className = isDark ? 'dark-theme' : 'light-theme';
+    })();
+
+    const b = document.getElementById('hub-btn');
+    const t = document.getElementById('btn-text');
+    const s = document.getElementById('sr-status');
+    const info = document.getElementById('connection-info');
+    const sessionId = document.getElementById('session-id');
+    const copyBtn = document.getElementById('copy-btn');
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    const shortcutsToggle = document.getElementById('shortcuts-toggle');
+    const shortcutsPanel = document.getElementById('shortcuts-panel');
+    const shortcutCopyRow = document.getElementById('shortcut-copy-row');
+    const shortcutPingRow = document.getElementById('shortcut-ping-row');
+    const shortcutNodeRow = document.getElementById('shortcut-node-row');
+
+    let isConnected = false;
+    let isTransitioning = false;
+    let uptimeInterval = null;
+    let uptimeSeconds = 0;
+    let isMeasuringPing = false;
+    let currentProtocol = 'AES-256-GCM';
+    let isNegotiatingProtocol = false;
+    let isShortcutsOpen = false;
+    let toastTimeout = null;
+    let copyTimeout = null;
+    let uptimeTimeout = null;
+    let isUptimeCopied = false;
+    let lastPing = null;
+    let lastNode = null;
+
+    function simulateButtonClick(elementId) {
+      const btn = document.getElementById(elementId);
+      if (!btn || btn.disabled || btn.style.display === 'none') return;
+      btn.classList.add('active-click');
+      setTimeout(() => {
+        btn.classList.remove('active-click');
+      }, 150);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function updateButtonHoverState(hovered) {
+      if (isConnected && !isTransitioning) {
+        if (hovered) {
+          t.textContent = 'Disconnect';
+          b.setAttribute('aria-label', 'Disconnect from secure gateway (Press H)');
+        } else {
+          t.textContent = '✓ Connected';
+          b.setAttribute('aria-label', 'Connected to secure gateway. Press H to disconnect.');
+        }
+      }
+    }
+
+    b.addEventListener('mouseenter', () => updateButtonHoverState(true));
+    b.addEventListener('mouseleave', () => updateButtonHoverState(false));
+    b.addEventListener('focus', () => updateButtonHoverState(true));
+    b.addEventListener('blur', () => updateButtonHoverState(false));
+
+    function animateProgressBar(duration, startVal, endVal, color, onComplete) {
+      const container = document.getElementById('progress-container');
+      const bar = document.getElementById('progress-bar');
+      container.style.display = 'block';
+      bar.style.backgroundColor = color;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentVal = Math.round(startVal + (endVal - startVal) * progress);
+        bar.style.width = currentVal + '%';
+        bar.setAttribute('aria-valuenow', currentVal);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          setTimeout(() => {
+            container.style.display = 'none';
+            bar.style.width = '0%';
+            bar.setAttribute('aria-valuenow', '0');
+            if (onComplete) onComplete();
+          }, 150);
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    let signalInterval = null;
+    function startSignalLoading() {
+      if (signalInterval) clearInterval(signalInterval);
+      let step = 0;
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+      const signalWrapper = document.getElementById('signal-wrapper');
+      if (signalWrapper) {
+        signalWrapper.setAttribute('aria-label', 'Signal strength: measuring');
+        signalWrapper.setAttribute('data-tooltip', 'Signal: Measuring...');
+      }
+      signalInterval = setInterval(() => {
+        bars.forEach((bar, idx) => {
+          if (bar) {
+            bar.style.opacity = idx === step ? '1' : '0.3';
+            bar.style.fill = 'currentColor';
+          }
+        });
+        step = (step + 1) % 4;
+      }, 150);
+    }
+
+    function setSignalStrength(ping) {
+      if (signalInterval) {
+        clearInterval(signalInterval);
+        signalInterval = null;
+      }
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+      let activeBars = 1;
+      let text = 'Poor';
+      let color = '#c62828';
+      if (ping < 20) {
+        activeBars = 4;
+        text = 'Excellent';
+        color = '#2e7d32';
+      } else if (ping < 30) {
+        activeBars = 3;
+        text = 'Good';
+        color = '#2e7d32';
+      } else if (ping < 40) {
+        activeBars = 2;
+        text = 'Fair';
+        color = '#f57c00';
+      }
+      bars.forEach((bar, idx) => {
+        if (bar) {
+          if (idx < activeBars) {
+            bar.style.opacity = '1';
+            bar.style.fill = color;
+          } else {
+            bar.style.opacity = '0.3';
+            bar.style.fill = 'currentColor';
+          }
+        }
+      });
+      const signalWrapper = document.getElementById('signal-wrapper');
+      if (signalWrapper) {
+        signalWrapper.setAttribute('aria-label', 'Signal strength: ' + text);
+        signalWrapper.setAttribute('data-tooltip', 'Signal: ' + text + ' (' + ping + ' ms)');
+      }
+    }
+
+    function resetSignalStrength() {
+      if (signalInterval) {
+        clearInterval(signalInterval);
+        signalInterval = null;
+      }
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+      bars.forEach(bar => {
+        if (bar) {
+          bar.style.opacity = '0.3';
+          bar.style.fill = 'currentColor';
+        }
+      });
+      const signalWrapper = document.getElementById('signal-wrapper');
+      if (signalWrapper) {
+        signalWrapper.setAttribute('aria-label', 'Signal strength: offline');
+        signalWrapper.setAttribute('data-tooltip', 'Signal: Offline');
+      }
+    }
+
+    async function measureLatency() {
+      if (isMeasuringPing || !isConnected) return;
+      isMeasuringPing = true;
+      const pingBtn = document.getElementById('ping-btn');
+      const pingIcon = pingBtn.querySelector('.ping-icon');
+      const latencyVal = document.getElementById('latency-val');
+      const latencyTrend = document.getElementById('latency-trend');
+      const nodeSelect = document.getElementById('node-select');
+
+      pingBtn.disabled = true;
+      if (nodeSelect) nodeSelect.disabled = true;
+      pingIcon.classList.add('spinning');
+      latencyVal.textContent = 'Measuring...';
+      latencyTrend.style.display = 'none';
+      startSignalLoading();
+      s.textContent = 'Measuring gateway connection latency...';
+
+      if (isConnected) {
+        latencyVal.setAttribute('aria-label', 'Connection latency: Measuring...');
+        latencyVal.setAttribute('data-tooltip', 'Measuring...');
+      }
+
+      const delay = 300 + Math.random() * 200;
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      const node = nodeSelect ? nodeSelect.value : 'us';
+      let ping = 15;
+      if (node === 'us') {
+        ping = Math.floor(10 + Math.random() * 15);
+      } else if (node === 'eu') {
+        ping = Math.floor(35 + Math.random() * 25);
+      } else if (node === 'ap') {
+        ping = Math.floor(130 + Math.random() * 50);
+      }
+
+      latencyVal.textContent = ping + ' ms';
+      if (isConnected) {
+        latencyVal.setAttribute('aria-label', 'Connection latency: ' + ping + ' ms. Click or press Enter to re-measure.');
+        latencyVal.setAttribute('data-tooltip', 'Click to Re-measure (R)');
+      }
+      setSignalStrength(ping);
+
+      let srTrendText = '';
+      if (lastNode === node && lastPing !== null) {
+        const diff = ping - lastPing;
+        if (diff < 0) {
+          latencyTrend.className = 'trend-indicator down';
+          latencyTrend.textContent = `↓ ${Math.abs(diff)}ms`;
+          latencyTrend.style.display = 'inline-flex';
+          srTrendText = ` Latency decreased by ${Math.abs(diff)} milliseconds.`;
+        } else if (diff > 0) {
+          latencyTrend.className = 'trend-indicator up';
+          latencyTrend.textContent = `↑ ${diff}ms`;
+          latencyTrend.style.display = 'inline-flex';
+          srTrendText = ` Latency increased by ${diff} milliseconds.`;
+        } else {
+          latencyTrend.style.display = 'none';
+        }
+      } else {
+        latencyTrend.style.display = 'none';
+      }
+
+      lastPing = ping;
+      lastNode = node;
+
+      pingIcon.classList.remove('spinning');
+      pingBtn.disabled = false;
+      if (nodeSelect) nodeSelect.disabled = false;
+      isMeasuringPing = false;
+
+      s.textContent = `Latency updated: ${ping} milliseconds for node ${node.toUpperCase()}.${srTrendText}`;
+    }
+
+    function cycleNode() {
+      if (!isConnected || isTransitioning || isMeasuringPing) return;
+      const nodeSelect = document.getElementById('node-select');
+      if (nodeSelect) {
+        flashBadge('badge-node');
+        flashBadge('kbd-node');
+        nodeSelect.selectedIndex = (nodeSelect.selectedIndex + 1) % nodeSelect.options.length;
+        changeNode();
+      }
+    }
+
+    function changeNode() {
+      const nodeSelect = document.getElementById('node-select');
+      if (nodeSelect) {
+        // Reset lastPing/lastNode on explicit node change
+        lastPing = null;
+        lastNode = null;
+        const latencyTrend = document.getElementById('latency-trend');
+        if (latencyTrend) latencyTrend.style.display = 'none';
+
+        const nodeText = nodeSelect.options[nodeSelect.selectedIndex].text;
+        showToast('Node changed: ' + nodeText);
+        measureLatency();
+      }
+    }
+
+    async function switchProtocol() {
+      if (isNegotiatingProtocol) return;
+      isNegotiatingProtocol = true;
+
+      const nextProtocol = currentProtocol === 'AES-256-GCM' ? 'ChaCha20-Poly1305' : 'AES-256-GCM';
+      const protocolBtn = document.getElementById('protocol-btn');
+      const protocolIcon = protocolBtn.querySelector('.protocol-icon');
+      const protocolVal = document.getElementById('protocol-val');
+
+      protocolBtn.disabled = true;
+      protocolIcon.classList.add('spinning');
+
+      const actionText = isConnected ? 'Negotiating' : 'Configuring';
+      protocolVal.textContent = actionText + '...';
+      protocolVal.setAttribute('aria-label', (isConnected ? 'Negotiating secure connection' : 'Configuring') + ' protocol...');
+      protocolVal.setAttribute('data-tooltip', actionText + '...');
+      s.textContent = (isConnected ? 'Negotiating secure connection' : 'Configuring') + ' protocol...';
+
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      currentProtocol = nextProtocol;
+      protocolVal.textContent = currentProtocol;
+      protocolVal.setAttribute('aria-label', 'Protocol: ' + currentProtocol + '. Click or press Enter to switch.');
+      protocolVal.setAttribute('data-tooltip', 'Click to Switch Protocol (P)');
+      protocolIcon.classList.remove('spinning');
+      protocolBtn.disabled = false;
+      isNegotiatingProtocol = false;
+
+      s.textContent = 'Protocol successfully updated to ' + currentProtocol + '.';
+      showToast('Protocol updated: ' + currentProtocol);
+    }
+
+    function flashBadge(badgeId) {
+      const badge = document.getElementById(badgeId);
+      if (!badge) return;
+      badge.classList.add('key-flash');
+      setTimeout(() => {
+        badge.classList.remove('key-flash');
+      }, 150);
+    }
+
+    function toggleShortcuts() {
+      isShortcutsOpen = !isShortcutsOpen;
+      if (isShortcutsOpen) {
+        shortcutsPanel.style.maxHeight = '280px';
+        shortcutsPanel.style.opacity = '1';
+        shortcutsPanel.setAttribute('aria-hidden', 'false');
+        shortcutsToggle.setAttribute('aria-expanded', 'true');
+        shortcutsToggle.setAttribute('aria-label', 'Hide keyboard shortcuts help');
+        shortcutsToggle.setAttribute('data-tooltip', 'Hide Shortcuts (?)');
+        s.textContent = 'Keyboard shortcuts help panel opened.';
+      } else {
+        shortcutsPanel.style.maxHeight = '0';
+        shortcutsPanel.style.opacity = '0';
+        shortcutsPanel.setAttribute('aria-hidden', 'true');
+        shortcutsToggle.setAttribute('aria-expanded', 'false');
+        shortcutsToggle.setAttribute('aria-label', 'Show keyboard shortcuts help');
+        shortcutsToggle.setAttribute('data-tooltip', 'Shortcuts Help (?)');
+        s.textContent = 'Keyboard shortcuts help panel closed.';
+      }
+    }
+
+    async function connectHub() {
+      if (isTransitioning) return;
+
+      if (!isConnected) {
+        isTransitioning = true;
+        document.title = '🟡 Connecting...';
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Connecting...';
+        s.textContent = 'Connecting to digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(1200, 0, 100, 'var(--primary)', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.add('connected');
+        isConnected = true;
+        isTransitioning = false;
+        document.title = '🟢 Connected';
+
+        t.textContent = '✓ Connected';
+        b.setAttribute('aria-label', 'Connected to secure gateway. Press H to disconnect.');
+
+        const sessionVal = 'CONN-' + Math.floor(1000 + Math.random() * 9000);
+        sessionId.textContent = sessionVal;
+        sessionId.classList.add('value-clickable', 'tooltip-bottom');
+        sessionId.setAttribute('tabindex', '0');
+        sessionId.setAttribute('role', 'button');
+        sessionId.setAttribute('data-tooltip', 'Click to Copy (C)');
+        sessionId.setAttribute('aria-label', 'Session ID: ' + sessionVal + '. Click or press Enter to copy.');
+        copyBtn.style.display = 'inline-flex';
+
+        // Update shortcuts helper rows opacity
+        shortcutCopyRow.style.opacity = '1';
+        shortcutPingRow.style.opacity = '1';
+        shortcutNodeRow.style.opacity = '1';
+        document.getElementById('node-row').style.display = 'flex';
+
+        // Start Uptime counter
+        uptimeSeconds = 0;
+        const uptimeVal = document.getElementById('uptime-val');
+        const uptimeRow = document.getElementById('uptime-row');
+        uptimeRow.style.display = 'flex';
+        uptimeVal.textContent = '00:00';
+        uptimeVal.classList.add('value-clickable', 'tooltip-bottom');
+        uptimeVal.setAttribute('tabindex', '0');
+        uptimeVal.setAttribute('role', 'button');
+        uptimeVal.setAttribute('data-tooltip', 'Click to Copy Uptime');
+        uptimeVal.setAttribute('aria-label', 'Uptime: 00:00. Click or press Enter to copy.');
+        uptimeInterval = setInterval(() => {
+          uptimeSeconds++;
+          const mins = String(Math.floor(uptimeSeconds / 60)).padStart(2, '0');
+          const secs = String(uptimeSeconds % 60).padStart(2, '0');
+          const formatted = mins + ':' + secs;
+          uptimeVal.textContent = formatted;
+          if (!isUptimeCopied) {
+            uptimeVal.setAttribute('aria-label', 'Uptime: ' + formatted + '. Click or press Enter to copy.');
+          }
+        }, 1000);
+
+        // Show Latency row and measure initial latency
+        const latencyRow = document.getElementById('latency-row');
+        latencyRow.style.display = 'flex';
+        const latencyValInit = document.getElementById('latency-val');
+        latencyValInit.classList.add('value-clickable');
+        latencyValInit.setAttribute('tabindex', '0');
+        latencyValInit.setAttribute('role', 'button');
+        latencyValInit.setAttribute('data-tooltip', 'Click to Re-measure (R)');
+        latencyValInit.setAttribute('aria-label', 'Connection latency: Measuring...');
+        measureLatency();
+
+        info.classList.add('visible');
+        info.setAttribute('aria-hidden', 'false');
+        s.textContent = 'Connection successful. Welcome to Mr.connection_006-hub! Secure session ' + sessionVal + ' is now active on protocol ' + currentProtocol + '.';
+        showToast('Connected successfully');
+      } else {
+        isTransitioning = true;
+        document.title = '🟡 Disconnecting...';
+        b.disabled = true;
+        b.setAttribute('aria-busy', 'true');
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        b.insertBefore(spinner, t);
+        t.textContent = 'Disconnecting...';
+        s.textContent = 'Disconnecting from digital hub, please wait.';
+
+        await new Promise(resolve => {
+          animateProgressBar(800, 0, 100, '#c62828', resolve);
+        });
+
+        spinner.remove();
+        b.removeAttribute('aria-busy');
+        b.disabled = false;
+        b.classList.remove('connected');
+        isConnected = false;
+        isTransitioning = false;
+        document.title = 'Mr.connection_006-hub';
+
+        t.textContent = 'Enter Hub';
+        b.setAttribute('aria-label', 'Enter the digital connection hub (Press H)');
+
+        copyBtn.style.display = 'none';
+        sessionId.textContent = 'Pending...';
+        sessionId.classList.remove('value-clickable', 'tooltip-bottom');
+        sessionId.removeAttribute('tabindex');
+        sessionId.removeAttribute('role');
+        sessionId.removeAttribute('data-tooltip');
+        sessionId.removeAttribute('aria-label');
+
+        const uptimeValReset = document.getElementById('uptime-val');
+        if (uptimeTimeout) {
+          clearTimeout(uptimeTimeout);
+          uptimeTimeout = null;
+        }
+        isUptimeCopied = false;
+        uptimeValReset.classList.remove('value-clickable', 'tooltip-bottom');
+        uptimeValReset.removeAttribute('tabindex');
+        uptimeValReset.removeAttribute('role');
+        uptimeValReset.removeAttribute('data-tooltip');
+        uptimeValReset.removeAttribute('aria-label');
+
+        // Reset copy button icons state and clear copy feedback timeout
+        if (copyTimeout) {
+          clearTimeout(copyTimeout);
+          copyTimeout = null;
+        }
+        const copyIcon = copyBtn.querySelector('.copy-icon');
+        const checkIcon = copyBtn.querySelector('.check-icon');
+        if (copyIcon && checkIcon) {
+          copyIcon.style.display = 'inline-block';
+          checkIcon.style.display = 'none';
+          copyBtn.setAttribute('aria-label', 'Copy Session ID to clipboard (Press C)');
+          copyBtn.setAttribute('data-tooltip', 'Copy Session ID (C)');
+        }
+
+        // Update shortcuts helper rows opacity
+        shortcutCopyRow.style.opacity = '0.5';
+        shortcutPingRow.style.opacity = '0.5';
+        shortcutNodeRow.style.opacity = '0.5';
+        document.getElementById('node-row').style.display = 'none';
+
+        resetSignalStrength();
+
+        // Stop Uptime counter
+        if (uptimeInterval) {
+          clearInterval(uptimeInterval);
+          uptimeInterval = null;
+        }
+        document.getElementById('uptime-row').style.display = 'none';
+        document.getElementById('uptime-val').textContent = '00:00';
+
+        // Hide Latency row and reset value
+        document.getElementById('latency-row').style.display = 'none';
+        const latencyValReset = document.getElementById('latency-val');
+        latencyValReset.textContent = 'Measuring...';
+        latencyValReset.classList.remove('value-clickable', 'tooltip-bottom');
+        latencyValReset.removeAttribute('tabindex');
+        latencyValReset.removeAttribute('role');
+        latencyValReset.removeAttribute('data-tooltip');
+        latencyValReset.removeAttribute('aria-label');
+        const latencyTrend = document.getElementById('latency-trend');
+        if (latencyTrend) latencyTrend.style.display = 'none';
+        lastPing = null;
+        lastNode = null;
+
+        info.classList.remove('visible');
+        info.setAttribute('aria-hidden', 'true');
+        s.textContent = 'Successfully disconnected. Gateway is now offline.';
+        showToast('Disconnected successfully');
+      }
+    }
+
+    async function copySessionId() {
+      if (!isConnected) return;
+      const id = sessionId.textContent;
+      try {
+        await navigator.clipboard.writeText(id);
+        const copyIcon = copyBtn.querySelector('.copy-icon');
+        const checkIcon = copyBtn.querySelector('.check-icon');
+
+        if (copyTimeout) {
+          clearTimeout(copyTimeout);
+          copyTimeout = null;
+        }
+
+        copyIcon.style.display = 'none';
+        checkIcon.style.display = 'inline-block';
+
+        copyBtn.setAttribute('aria-label', 'Session ID copied to clipboard');
+        copyBtn.setAttribute('data-tooltip', 'Session ID Copied!');
+        sessionId.setAttribute('aria-label', 'Session ID: ' + id + '. Copied to clipboard!');
+        sessionId.setAttribute('data-tooltip', 'Session ID Copied!');
+        s.textContent = 'Session ID copied to clipboard';
+        showToast('Session ID copied to clipboard');
+        copyTimeout = setTimeout(() => {
+          copyTimeout = null;
+          if (isConnected) {
+            copyIcon.style.display = 'inline-block';
+            checkIcon.style.display = 'none';
+            copyBtn.setAttribute('aria-label', 'Copy Session ID to clipboard (Press C)');
+            copyBtn.setAttribute('data-tooltip', 'Copy Session ID (C)');
+            sessionId.setAttribute('aria-label', 'Session ID: ' + sessionId.textContent + '. Click or press Enter to copy.');
+            sessionId.setAttribute('data-tooltip', 'Click to Copy (C)');
+          }
+        }, 2000);
+      } catch (err) {
+        s.textContent = 'Failed to copy Session ID. Please select and copy manually.';
+        showToast('Failed to copy Session ID');
+      }
+    }
+
+    async function copyUptime() {
+      if (!isConnected) return;
+      const uptimeVal = document.getElementById('uptime-val');
+      const duration = uptimeVal.textContent;
+      try {
+        await navigator.clipboard.writeText('Uptime: ' + duration);
+        if (uptimeTimeout) {
+          clearTimeout(uptimeTimeout);
+          uptimeTimeout = null;
+        }
+        isUptimeCopied = true;
+        uptimeVal.setAttribute('aria-label', 'Uptime: ' + duration + '. Copied to clipboard!');
+        uptimeVal.setAttribute('data-tooltip', 'Uptime Copied!');
+        s.textContent = 'Uptime copied to clipboard';
+        showToast('Uptime copied: ' + duration);
+        uptimeTimeout = setTimeout(() => {
+          uptimeTimeout = null;
+          isUptimeCopied = false;
+          if (isConnected) {
+            uptimeVal.setAttribute('aria-label', 'Uptime: ' + uptimeVal.textContent + '. Click or press Enter to copy.');
+            uptimeVal.setAttribute('data-tooltip', 'Click to Copy Uptime');
+          }
+        }, 2000);
+      } catch (err) {
+        s.textContent = 'Failed to copy uptime.';
+        showToast('Failed to copy uptime');
+      }
+    }
+
+    const latencyValEl = document.getElementById('latency-val');
+    latencyValEl.addEventListener('click', () => {
+      if (isConnected && !isMeasuringPing) {
+        simulateButtonClick('ping-btn');
+        measureLatency();
+      }
+    });
+
+    latencyValEl.addEventListener('keydown', (e) => {
+      if (isConnected && !isMeasuringPing && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        simulateButtonClick('ping-btn');
+        measureLatency();
+      }
+    });
+
+    const uptimeValEl = document.getElementById('uptime-val');
+    uptimeValEl.addEventListener('click', () => {
+      if (isConnected) copyUptime();
+    });
+
+    uptimeValEl.addEventListener('keydown', (e) => {
+      if (isConnected && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        copyUptime();
+      }
+    });
+
+    sessionId.addEventListener('click', () => {
+      if (isConnected) {
+        simulateButtonClick('copy-btn');
+        copySessionId();
+      }
+    });
+
+    function handleKbdBadgeAction(kbdId) {
+      flashBadge(kbdId);
+      switch (kbdId) {
+        case 'kbd-help':
+          simulateButtonClick('shortcuts-toggle');
+          toggleShortcuts();
+          break;
+        case 'kbd-esc':
+          if (isShortcutsOpen) toggleShortcuts();
+          break;
+        case 'kbd-theme':
+          simulateButtonClick('theme-toggle');
+          toggleTheme();
+          break;
+        case 'kbd-hub':
+          if (!isTransitioning) {
+            simulateButtonClick('hub-btn');
+            connectHub();
+          }
+          break;
+        case 'kbd-protocol':
+          if (!isTransitioning && !isNegotiatingProtocol) {
+            simulateButtonClick('protocol-btn');
+            switchProtocol();
+          }
+          break;
+        case 'kbd-copy':
+          if (isConnected && !isTransitioning && copyBtn.style.display !== 'none') {
+            simulateButtonClick('copy-btn');
+            copySessionId();
+          } else if (!isConnected) {
+            showToast('Connect to gateway first to copy Session ID');
+          }
+          break;
+        case 'kbd-ping':
+          if (isConnected && !isTransitioning && !isMeasuringPing) {
+            simulateButtonClick('ping-btn');
+            measureLatency();
+          } else if (!isConnected) {
+            showToast('Connect to gateway first to re-measure latency');
+          }
+          break;
+        case 'kbd-node':
+          if (isConnected && !isTransitioning && !isMeasuringPing) {
+            cycleNode();
+          } else if (!isConnected) {
+            showToast('Connect to gateway first to change node');
+          }
+          break;
+      }
+    }
+
+    shortcutsPanel.addEventListener('click', (e) => {
+      const kbd = e.target.closest('kbd');
+      if (kbd && kbd.id) {
+        e.stopPropagation();
+        handleKbdBadgeAction(kbd.id);
+      }
+    });
+
+    shortcutsPanel.addEventListener('keydown', (e) => {
+      const kbd = e.target.closest('kbd');
+      if (kbd && kbd.id && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleKbdBadgeAction(kbd.id);
+      }
+    });
+
+    const protocolValEl = document.getElementById('protocol-val');
+    protocolValEl.addEventListener('click', () => {
+      if (!isTransitioning && !isNegotiatingProtocol) {
+        simulateButtonClick('protocol-btn');
+        switchProtocol();
+      }
+    });
+
+    protocolValEl.addEventListener('keydown', (e) => {
+      if (!isTransitioning && !isNegotiatingProtocol && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        simulateButtonClick('protocol-btn');
+        switchProtocol();
+      }
+    });
+
+    const badgeNodeEl = document.getElementById('badge-node');
+    badgeNodeEl.addEventListener('keydown', (e) => {
+      if (isConnected && !isTransitioning && !isMeasuringPing && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        cycleNode();
+      }
+    });
+
+    sessionId.addEventListener('keydown', (e) => {
+      if (isConnected && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        simulateButtonClick('copy-btn');
+        copySessionId();
+      }
+    });
+
+    function setTheme(isDark) {
+      if (isDark) {
+        document.documentElement.className = 'dark-theme';
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+        themeToggle.setAttribute('aria-label', 'Switch to light mode (Press T)');
+        themeToggle.setAttribute('data-tooltip', 'Switch to Light Mode (T)');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.className = 'light-theme';
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+        themeToggle.setAttribute('aria-label', 'Switch to dark mode (Press T)');
+        themeToggle.setAttribute('data-tooltip', 'Switch to Dark Mode (T)');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark-theme') ||
+                     (!document.documentElement.classList.contains('light-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      setTheme(!isDark);
+      s.textContent = `Theme switched to ${!isDark ? 'dark' : 'light'} mode`;
+      showToast(!isDark ? 'Switched to Dark Mode' : 'Switched to Light Mode');
+    }
+
+    // Set initial icon and accessibility attributes on load
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+    setTheme(initialDark);
+
+    document.addEventListener('keydown', (e) => {
+      // Avoid firing shortcut if typing in text fields or navigating select menus
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+      if (e.key === 'Escape' && isShortcutsOpen) {
+        e.preventDefault();
+        flashBadge('kbd-esc');
+        toggleShortcuts();
+        return;
+      }
+
+      if ((e.key === '?' || e.key === '/') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        flashBadge('badge-toggle');
+        flashBadge('kbd-help');
+        simulateButtonClick('shortcuts-toggle');
+        toggleShortcuts();
+      }
+
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        flashBadge('badge-theme');
+        flashBadge('kbd-theme');
+        simulateButtonClick('theme-toggle');
+        toggleTheme();
+      }
+
+      if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (!isTransitioning) {
+          flashBadge('badge-hub');
+          flashBadge('kbd-hub');
+          simulateButtonClick('hub-btn');
+          connectHub();
+        }
+      }
+
+      if (isConnected && !isTransitioning && copyBtn.style.display !== 'none') {
+        if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          flashBadge('badge-copy');
+          flashBadge('kbd-copy');
+          simulateButtonClick('copy-btn');
+          copySessionId();
+        }
+      }
+
+      if (isConnected && !isTransitioning && !isMeasuringPing) {
+        if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          flashBadge('badge-ping');
+          flashBadge('kbd-ping');
+          simulateButtonClick('ping-btn');
+          measureLatency();
+        }
+        if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          flashBadge('badge-node');
+          flashBadge('kbd-node');
+          cycleNode();
+        }
+      }
+
+      if (!isTransitioning && !isNegotiatingProtocol) {
+        if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          flashBadge('badge-protocol');
+          flashBadge('kbd-protocol');
+          simulateButtonClick('protocol-btn');
+          switchProtocol();
+        }
+      }
+    });
+
+    // Dismiss shortcuts help panel on clicking outside
+    document.addEventListener('click', (e) => {
+      if (!isShortcutsOpen) return;
+      const shortcutsPanel = document.getElementById('shortcuts-panel');
+      const shortcutsToggle = document.getElementById('shortcuts-toggle');
+      if (!shortcutsPanel.contains(e.target) && !shortcutsToggle.contains(e.target)) {
+        toggleShortcuts();
+      }
+    });
+
+    // Click to immediately dismiss visual toast notification
+    document.getElementById('toast').addEventListener('click', () => {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('show');
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+      }
+    });
+  </script>
+</body>
+</html>
