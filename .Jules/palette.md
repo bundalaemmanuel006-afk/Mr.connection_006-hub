@@ -1,0 +1,3 @@
+## 2026-08-22 - Interactive Network Signal Bar Telemetry Trigger
+**Learning:** Wrapping visual signal strength telemetry icons (`#signal-wrapper`) in interactive keyboard and click affordances (`role="button"`, `tabindex="0"`, `.value-clickable`) provides intuitive redundancy alongside numerical latency stats and manual action buttons. Ensuring that state-dependent controls dynamically toggle their interactive roles (`role="button"`) and ARIA labels based on connection state prevents presenting actionable hints to screen readers when the feature is offline.
+**Action:** Always make visual telemetry wrappers interactive when connected, synchronize their ARIA labels with action affordances, and cleanly revoke interactive roles when disconnected.
