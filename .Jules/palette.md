@@ -1,0 +1,3 @@
+## 2026-10-01 - Tooltip Alignment Strategy for Compact Collapsible List Rows
+**Learning:** Adding `.tooltip-bottom` to interactive elements (`<kbd>`) inside compact stacked list rows causes tooltips to render downward (`top: 125%`) directly obscuring text and controls on the row below. Using default top-positioned tooltips (`bottom: 125%`) and toggling `.visible` on the parent container (`overflow: visible`) ensures tooltips pop upward into empty card space, maintaining full legibility across adjacent UI rows.
+**Action:** Use default top-positioned tooltips for elements inside stacked vertical lists, and ensure parent panels toggle `.visible` to prevent clipping.
