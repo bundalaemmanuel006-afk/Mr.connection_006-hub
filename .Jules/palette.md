@@ -1,0 +1,3 @@
+## 2026-10-27 - Visual Affordances & Tooltip Guidance for Dismissible Toast Notifications
+**Learning:** Transient toast notifications that support interactive dismissals (such as click or Escape key dismissal) lack discoverability if presented as plain text blocks without visual controls or tooltip hints. Adding an explicit close indicator (`.toast-close` with `aria-label="Dismiss notification"`) and hover tooltip guidance (`title="Click or press Esc to dismiss"`) provides immediate visual clarity for mouse and screen reader users alike.
+**Action:** Always include a visual dismiss icon and informative tooltip/aria-label when creating click-to-dismiss toast notifications.
