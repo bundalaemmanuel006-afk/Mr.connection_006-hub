@@ -1,0 +1,7 @@
+## 2026-11-08 - Native Tooltip Guidance for Compact Values & Atomic Live Announcements
+**Learning:** In compact card interfaces where CSS pseudo-element popovers (`[data-tooltip]`) are deliberately omitted to avoid overlaying tightly stacked adjacent rows, interactive clickable values (such as uptime counters) risk being completely undiscoverable to mouse users. Utilizing native browser `title` attributes delivers non-intrusive hover affordance without layout occlusion, while pairing `aria-atomic="true"` on live regions ensures screen readers announce updated status context in its entirety without dropping text fragments.
+**Action:** Use native browser `title` attributes on compact interactive text values where CSS popovers would occlude neighboring controls, and always include `aria-atomic="true"` on polite live region containers.
+
+## 2026-10-27 - Visual Affordances & Tooltip Guidance for Dismissible Toast Notifications
+**Learning:** Transient toast notifications that support interactive dismissals (such as click or Escape key dismissal) lack discoverability if presented as plain text blocks without visual controls or tooltip hints. Adding an explicit close indicator (`.toast-close` with `aria-label="Dismiss notification"`) and hover tooltip guidance (`title="Click or press Esc to dismiss"`) provides immediate visual clarity for mouse and screen reader users alike.
+**Action:** Always include a visual dismiss icon and informative tooltip/aria-label when creating click-to-dismiss toast notifications.
